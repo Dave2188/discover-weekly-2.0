@@ -1,9 +1,5 @@
 "use strict";
 
 /** @type {import('next').NextConfig} */
-var nextConfig = {
-  env: {
-    customKey: 'my-value'
-  }
-};
+var nextConfig = {};
 module.exports = nextConfig;

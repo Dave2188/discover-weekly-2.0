@@ -57,9 +57,13 @@ var NavLink = function (_a) {
 function Navar() {
     var _this = this;
     var _a, _b;
-    var urlParams = new URLSearchParams(window.location.search);
-    var code = urlParams.get("code");
-    var verifier = localStorage.getItem("code_verifier");
+    var code;
+    var verifier;
+    if (typeof window !== "undefined") {
+        var urlParams = new URLSearchParams(window.location.search);
+        code = urlParams.get("code");
+        verifier = localStorage.getItem("code_verifier");
+    }
     var _c = react_2.useDisclosure(), isOpen = _c.isOpen, onOpen = _c.onOpen, onClose = _c.onClose;
     var _d = react_2.useColorMode(), colorMode = _d.colorMode, toggleColorMode = _d.toggleColorMode;
     var router = navigation_1.useRouter(); // @ts-expect-error

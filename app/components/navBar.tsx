@@ -45,9 +45,14 @@ const NavLink = ({ children, href }: { children: ReactNode; href: string | undef
 );
 
 export default function Navar() {
-	const urlParams = new URLSearchParams(window.location.search);
-	let code = urlParams.get("code");
-	const verifier = localStorage.getItem("code_verifier");
+	let code: string | null;
+	let verifier: string | null;
+	if (typeof window !== "undefined") {
+		const urlParams = new URLSearchParams(window.location.search);
+		code = urlParams.get("code");
+		verifier = localStorage.getItem("code_verifier");
+	}
+
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { colorMode, toggleColorMode } = useColorMode();
 	const router = useRouter(); // @ts-expect-error

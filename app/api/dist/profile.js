@@ -50,7 +50,7 @@ function getProfile() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 3,  4]);
                     accessToken = localStorage.getItem("access_token");
                     return [4 /*yield*/, fetch("https://api.spotify.com/v1/me", {
                             headers: {
