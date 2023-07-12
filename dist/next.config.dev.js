@@ -4,9 +4,6 @@
 var nextConfig = {
   env: {
     customKey: 'my-value'
-  },
-  experimental: {
-    serverActions: true
   }
 };
 module.exports = nextConfig;

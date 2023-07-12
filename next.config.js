@@ -1,12 +1,9 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = { 
-  env: {
+    env: {
     customKey: 'my-value',
   },
-   experimental: {
-    serverActions: true,
-
-  },}
+}
 
 module.exports = nextConfig
