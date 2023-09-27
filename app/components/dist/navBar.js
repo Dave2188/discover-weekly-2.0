@@ -59,6 +59,7 @@ function Navar() {
     var _a, _b;
     var code;
     var verifier;
+    var verifierSet = false;
     if (typeof window !== "undefined") {
         var urlParams = new URLSearchParams(window.location.search);
         code = urlParams.get("code");
@@ -66,7 +67,7 @@ function Navar() {
     }
     var _c = react_2.useDisclosure(), isOpen = _c.isOpen, onOpen = _c.onOpen, onClose = _c.onClose;
     var _d = react_2.useColorMode(), colorMode = _d.colorMode, toggleColorMode = _d.toggleColorMode;
-    var router = navigation_1.useRouter(); // @ts-expect-error
+    var router = navigation_1.useRouter();
     var _e = react_1.useContext(userContext_1.UserContext), user = _e.user, setUser = _e.setUser;
     var data = react_query_1.useQuery(["token"], function () { return __awaiter(_this, void 0, Promise, function () {
         return __generator(this, function (_a) {
@@ -83,7 +84,6 @@ function Navar() {
         refetchOnReconnect: false,
         retry: 0,
         onSuccess: function (data) {
-            console.log("onSuccess data:", data); // log the data
             if (!data)
                 return;
             console.log("Storing tokens in localStorage");
@@ -114,11 +114,12 @@ function Navar() {
         React.createElement(react_2.Box, { bg: react_2.useColorModeValue("gray.100", "black"), px: 4 },
             React.createElement(react_2.Flex, { h: 16, alignItems: "center", justifyContent: "space-between" },
                 React.createElement(react_2.IconButton, { size: "md", icon: isOpen ? React.createElement(icons_1.CloseIcon, null) : React.createElement(icons_1.HamburgerIcon, null), "aria-label": "Open Menu", display: { md: "none" }, onClick: isOpen ? onClose : onOpen }),
-                React.createElement(react_2.HStack, { spacing: 8, alignItems: "center" },
+                user.display_name ? (React.createElement(react_2.HStack, { spacing: 8, alignItems: "center" },
                     React.createElement(react_2.Box, null, user.display_name),
                     React.createElement(react_2.HStack, { as: "nav", spacing: 4, display: { base: "none", md: "flex" } },
                         React.createElement(NavLink, { href: "#" }, ((_a = user === null || user === void 0 ? void 0 : user.followers) === null || _a === void 0 ? void 0 : _a.total) + " Followers"),
-                        React.createElement(NavLink, { href: "" + ((_b = user === null || user === void 0 ? void 0 : user.external_urls) === null || _b === void 0 ? void 0 : _b.spotify) }, "My Spotify"))),
+                        React.createElement(NavLink, { href: "" + ((_b = user === null || user === void 0 ? void 0 : user.external_urls) === null || _b === void 0 ? void 0 : _b.spotify) }, "My Spotify")))) : (React.createElement(react_2.HStack, { spacing: 8, alignItems: "center" },
+                    React.createElement(react_2.Box, null, "Welcome Please Sign In"))),
                 React.createElement(react_2.Flex, { alignItems: "center" },
                     React.createElement(react_2.Button, { margin: 5, onClick: toggleColorMode }, colorMode === "light" ? React.createElement(icons_1.MoonIcon, null) : React.createElement(icons_1.SunIcon, null)),
                     user.display_name ? (React.createElement(react_2.Menu, null,

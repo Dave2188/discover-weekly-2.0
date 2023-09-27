@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useContext, ReactNode, useEffect } from "react";
+import { useContext, ReactNode, useEffect, useState } from "react";
 import {
 	Box,
 	Flex,
@@ -47,6 +47,7 @@ const NavLink = ({ children, href }: { children: ReactNode; href: string | undef
 export default function Navar() {
 	let code: string | null;
 	let verifier: string | null;
+	let verifierSet = false;
 	if (typeof window !== "undefined") {
 		const urlParams = new URLSearchParams(window.location.search);
 		code = urlParams.get("code");
@@ -55,8 +56,8 @@ export default function Navar() {
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { colorMode, toggleColorMode } = useColorMode();
-	const router = useRouter(); // @ts-expect-error
-	const { user, setUser } = useContext(UserContext);
+	const router = useRouter();
+	const { user, setUser } = useContext<any>(UserContext);
 
 	const { data } = useQuery(
 		["token"],
@@ -70,7 +71,6 @@ export default function Navar() {
 			refetchOnReconnect: false,
 			retry: 0,
 			onSuccess: data => {
-				console.log("onSuccess data:", data); // log the data
 				if (!data) return;
 				console.log("Storing tokens in localStorage");
 				localStorage.setItem("access_token", data.access_token);
@@ -102,13 +102,20 @@ export default function Navar() {
 						display={{ md: "none" }}
 						onClick={isOpen ? onClose : onOpen}
 					/>
-					<HStack spacing={8} alignItems={"center"}>
-						<Box>{user.display_name}</Box>
-						<HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-							<NavLink href="#">{`${user?.followers?.total} Followers`}</NavLink>
-							<NavLink href={`${user?.external_urls?.spotify}`}>{"My Spotify"}</NavLink>
+					{user.display_name ? (
+						<HStack spacing={8} alignItems={"center"}>
+							<Box>{user.display_name}</Box>
+							<HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
+								<NavLink href="#">{`${user?.followers?.total} Followers`}</NavLink>
+								<NavLink href={`${user?.external_urls?.spotify}`}>{"My Spotify"}</NavLink>
+							</HStack>
 						</HStack>
-					</HStack>
+					) : (
+						<HStack spacing={8} alignItems={"center"}>
+							<Box>{"Welcome Please Sign In"}</Box>
+						</HStack>
+					)}
+
 					<Flex alignItems={"center"}>
 						<Button margin={5} onClick={toggleColorMode}>
 							{colorMode === "light" ? <MoonIcon /> : <SunIcon />}
