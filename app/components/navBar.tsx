@@ -20,10 +20,10 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { UserContext } from "../context/userContext";
-import { getRedirect, getToken } from "../auth/auth";
+import { getRedirect, getToken } from "../api/auth";
 import { useRouter } from "next/navigation";
 import { useQuery } from "react-query";
-import { getLocalStorage } from "../util/helpers";
+import { getLocalStorage, logout } from "../util/helpers";
 import { getProfile } from "../api/profile";
 // import { getProfile } from "../api/profile";
 
@@ -47,7 +47,6 @@ const NavLink = ({ children, href }: { children: ReactNode; href: string | undef
 export default function Navar() {
 	let code: string | null;
 	let verifier: string | null;
-	let verifierSet = false;
 	if (typeof window !== "undefined") {
 		const urlParams = new URLSearchParams(window.location.search);
 		code = urlParams.get("code");
@@ -57,19 +56,25 @@ export default function Navar() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const { colorMode, toggleColorMode } = useColorMode();
 	const router = useRouter();
-	const { user, setUser } = useContext<any>(UserContext);
+	const { user, setUser, clearUser } = useContext<any>(UserContext);
+	const accessToken = getLocalStorage("access_token");
 
 	const { data } = useQuery(
 		["token"],
 		async (): Promise<any> => {
 			if (code && verifier) {
-				return await getToken(code, localStorage.getItem("code_verifier")!, process.env.NEXT_PUBLIC_CLIENT_ID!);
+				return await getToken(
+					code as string,
+					localStorage.getItem("code_verifier")!,
+					process.env.NEXT_PUBLIC_CLIENT_ID!
+				);
+			} else if (accessToken) {
+				return getProfile().then(data => setUser(data));
 			}
 		},
 		{
 			refetchOnWindowFocus: false,
 			refetchOnReconnect: false,
-			retry: 0,
 			onSuccess: data => {
 				if (!data) return;
 				console.log("Storing tokens in localStorage");
@@ -102,9 +107,9 @@ export default function Navar() {
 						display={{ md: "none" }}
 						onClick={isOpen ? onClose : onOpen}
 					/>
-					{user.display_name ? (
+					{user?.display_name ? (
 						<HStack spacing={8} alignItems={"center"}>
-							<Box>{user.display_name}</Box>
+							<Box>{user?.display_name}</Box>
 							<HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
 								<NavLink href="#">{`${user?.followers?.total} Followers`}</NavLink>
 								<NavLink href={`${user?.external_urls?.spotify}`}>{"My Spotify"}</NavLink>
@@ -120,16 +125,31 @@ export default function Navar() {
 						<Button margin={5} onClick={toggleColorMode}>
 							{colorMode === "light" ? <MoonIcon /> : <SunIcon />}
 						</Button>
-						{user.display_name ? (
+						{user?.display_name ? (
 							<Menu>
 								<MenuButton as={Button} rounded={"full"} variant={"link"} cursor={"pointer"} minW={0}>
 									<Avatar size={"md"} src={user?.images[1].url} />
 								</MenuButton>
 								<MenuList>
-									<MenuItem>Link 1</MenuItem>
-									<MenuItem>Link 2</MenuItem>
+									<MenuItem>
+										<Box>{user?.display_name}</Box>
+									</MenuItem>
+									<MenuItem>
+										<NavLink href="#">{`${user?.followers?.total} Followers`}</NavLink>
+										<NavLink href={`${user?.external_urls?.spotify}`}>{"My Spotify"}</NavLink>
+									</MenuItem>
 									<MenuDivider />
-									<MenuItem>Link 3</MenuItem>
+									<MenuItem>
+										<Button
+											className="cursor-pointer"
+											onClick={() => {
+												logout();
+												clearUser();
+											}}
+										>
+											Logout
+										</Button>
+									</MenuItem>
 								</MenuList>
 							</Menu>
 						) : (

@@ -33,7 +33,7 @@ export async function generateCodeChallenge() {
 export async function getRedirect() {
 	const state = await generateRandomString(16);
 	const url = await generateCodeChallenge().then(codeChallenge => {
-		const scope = "user-read-private user-read-email";
+		const scope = "user-read-private user-read-email user-top-read";
 
 		let args = new URLSearchParams({
 			response_type: "code",
@@ -44,7 +44,7 @@ export async function getRedirect() {
 			code_challenge_method: "S256",
 			code_challenge: codeChallenge,
 		});
-
+		console.log(scope);
 		return "https://accounts.spotify.com/authorize?" + args;
 	});
 	return [url, codeVerifier];

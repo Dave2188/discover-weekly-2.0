@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export const UserContext = createContext<User | {}>({});
 
@@ -10,5 +10,9 @@ interface User {
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User>({});
 
-	return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
+	const clearUser = () => {
+		return setUser({});
+	};
+
+	return <UserContext.Provider value={{ user, setUser, clearUser }}>{children}</UserContext.Provider>;
 };

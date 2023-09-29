@@ -1,5 +1,15 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { getLocalStorage, setLocalStorage } from "../util/helpers";
+axios.defaults.baseURL = "https://api.spotify.com/v1";
+axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+
+axios.interceptors.request.use(config => {
+	const accessToken = getLocalStorage("access_token");
+	if (accessToken) {
+		config.headers.Authorization = `Bearer ${accessToken}`;
+	}
+	return config;
+});
 
 axios.interceptors.response.use(
 	res => {
@@ -7,23 +17,37 @@ axios.interceptors.response.use(
 	},
 	async function (error) {
 		const originalRequest = error.config;
-		let refreshTokenError, res;
-		let body = new URLSearchParams({
-			grant_type: "refresh_token",
-			refresh_token: getLocalStorage("refresh_token"),
-			client_id: `${process.env.CLIENT_ID}`,
-		});
-		if (error.response.status === 401 && !originalRequest._retry) {
+		const refreshToken = localStorage.getItem("refresh_token");
+
+		if (error.response && error.response.status === 401 && !originalRequest._retry && refreshToken) {
 			originalRequest._retry = true;
 
-			res = await axios({
-				method: "POST",
-				url: "https://accounts.spotify.com/api/token",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-				data: body,
-			}).then(() => {});
+			let body = new URLSearchParams({
+				grant_type: "refresh_token",
+				refresh_token: refreshToken,
+				client_id: `${process.env.NEXT_PUBLIC_CLIENT_ID}`,
+			});
+
+			try {
+				const res = await axios({
+					method: "POST",
+					url: "https://accounts.spotify.com/api/token",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					data: body,
+				});
+
+				if (res.status === 200) {
+					setLocalStorage("access_token", res.data.access_token);
+					originalRequest.headers["Authorization"] = `Bearer ${res.data.access_token}`;
+					return axios(originalRequest);
+				}
+			} catch (err) {
+				console.error("Token refresh failed", err);
+			}
 		}
+		return Promise.reject(error);
 	}
 );
+export default axios;

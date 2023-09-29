@@ -1,25 +1,56 @@
-import axios from "axios";
-import { getLocalStorage } from "../util/helpers";
-axios.defaults.baseURL = "https://api.spotify.com/v1";
-axios.defaults.headers.common["authorization"] = `Bearer ${getLocalStorage("access_token")}`;
-axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-axios.defaults.headers["Access-Control-Allow-Origin"] = "http://localhost:3000/";
-axios.defaults.headers["Access-Control-Allow-Credentials"] = true;
+import { TopTrack } from "../util/types";
+import axios from "./interceptors";
 
 export async function getProfile() {
 	try {
-		let accessToken = localStorage.getItem("access_token");
+		const response = await axios.get("/me");
+		return response.data;
+	} catch (error) {
+		console.log(error);
+		return;
+	}
+}
 
-		const response = await fetch("https://api.spotify.com/v1/me", {
-			headers: {
-				Authorization: "Bearer " + accessToken,
+export async function fetchTopArtists() {
+	const type = "artists";
+	const time_range = "medium_term";
+	const limit = 10;
+	const offset = 0;
+
+	try {
+		const response = await axios.get(`/me/top/${type}`, {
+			params: {
+				time_range,
+				limit,
+				offset,
 			},
 		});
 
-		const data = await response.json();
-		return data;
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching top artists:", error);
+	}
+}
+
+export async function search(genres: string, artist?: string, query?: string) {
+	const type = "tracks";
+	const market = "UM";
+	const limit = 5;
+	const offset = 0;
+
+	try {
+		const response = await axios.get("/search", {
+			params: {
+				offset: 0,
+				limit: 5,
+				market: "US",
+				type: "track",
+				q: `artist:${artist} genre:${genres}`,
+			},
+		});
+
+		return response.data;
 	} catch (error) {
 		console.log(error);
 	}
-	return;
 }
