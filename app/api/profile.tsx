@@ -32,24 +32,30 @@ export async function fetchTopArtists() {
 	}
 }
 
-export async function search(genres: string, artist?: string, query?: string) {
-	const type = "tracks";
-	const market = "UM";
-	const limit = 5;
-	const offset = 0;
-
+export async function createNewPlaylist(user_id: string) {
+	const name = "DiscoverWeekly_2.0";
+	const description = "A second chance at this weeks discoveries";
+	const isPublic = false;
+	console.log(user_id);
 	try {
-		const response = await axios.get("/search", {
-			params: {
-				offset: 0,
-				limit: 5,
-				market: "US",
-				type: "track",
-				q: `artist:${artist} genre:${genres}`,
+		const response = await axios.post(
+			`/users/${user_id}/playlists`,
+			{
+				name: name,
+				description: description,
+				public: isPublic,
 			},
-		});
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+		if (response.status >= 200 && response.status < 300) {
+			console.log("playlist created");
+		}
 
-		return response.data;
+		return response.data.id;
 	} catch (error) {
 		console.log(error);
 	}

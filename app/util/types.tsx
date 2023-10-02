@@ -23,3 +23,13 @@ type images = {
 	url: string;
 	width: number;
 };
+
+export type TopTracks = {
+	href: string;
+	items: TopTrack[];
+	limit: number;
+	next: string;
+	offset: number;
+	previous: string | null;
+	total: number;
+};

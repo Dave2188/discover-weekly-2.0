@@ -2,8 +2,15 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "./context/userContext";
 import { useQuery } from "react-query";
-import { fetchTopArtists, search } from "./api/profile";
-import { getLocalStorage } from "./util/helpers";
+import { fetchTopArtists } from "./api/profile";
+import { convertTrackIds, getLocalStorage } from "./util/helpers";
+import {
+	createDiscoverWeekly2,
+	getArtistTopTracks,
+	getNewDiscoverPLaylist,
+	getSimilarArtists,
+	search,
+} from "./api/playlist";
 
 export default function Home() {
 	const { user, setUser } = useContext<any>(UserContext);
@@ -39,10 +46,10 @@ export default function Home() {
 		}
 	}, []);
 
-	const { data, error, isFetching, refetch } = useQuery("getMix", () => search("alt", "korn"), {
+	const { data, error, isFetching, refetch } = useQuery("getMix", () => createDiscoverWeekly2(user.id, topData), {
 		enabled: false,
 		onSuccess: data => {
-			setTracks(data);
+			console.log(data);
 		},
 	});
 
@@ -50,7 +57,9 @@ export default function Home() {
 		refetch();
 	};
 
-	console.log(tracks);
+	console.log(topData);
+	console.log(data);
+	// console.log(convertTrackIds(data));
 	return (
 		<>
 			<main className="flex flex-col items-center justify-between min-h-screen p-24">
@@ -75,27 +84,29 @@ export default function Home() {
 							click me
 						</button>
 					</div>
-					<div>
-						<h1 className="mb-2 underline ">Mixer</h1>
-						{isFetching ? (
-							<h2>Getting your blend......</h2>
-						) : (
-							<>
-								{tracks?.tracks?.items?.map((track: any, index: any) => (
-									<div key={index}>
-										<h2>
-											{track.artists[0].name}: {track.name}
-										</h2>
-										{/* <p>{artist.genres.join(", ")}</p> */}
-									</div>
-								))}
-							</>
-						)}
+					{topData && (
+						<div>
+							<h1 className="mb-2 underline ">Discover Weekly 2.0</h1>
+							{isFetching ? (
+								<h2>Getting your blend......</h2>
+							) : (
+								<>
+									{tracks?.tracks?.items?.map((track: any, index: any) => (
+										<div key={index}>
+											<h2>
+												{track.artists[0].name}: {track.name}
+											</h2>
+											{/* <p>{artist.genres.join(", ")}</p> */}
+										</div>
+									))}
+								</>
+							)}
 
-						<button className="mt-5 text-black bg-white" onClick={handleMixClick}>
-							click me
-						</button>
-					</div>
+							<button className="mt-5 text-black bg-white" onClick={handleMixClick}>
+								Get new Playlist
+							</button>
+						</div>
+					)}
 				</div>
 			</main>
 		</>
